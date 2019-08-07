@@ -1,14 +1,11 @@
-import abc
 import tensorflow as tf
 import numpy as np
-import math
 
-from typing import Any, Dict, Iterator, List, Union
+from typing import Any, Dict, List, Union
 from cirq.sim import simulator
 from cirq import circuits, ops, study
 
-from tfc.tf_apply_unitary import tf_apply_unitary, ApplyTFUnitaryArgs
-from tfc.gate_wrappers import tf_gate_wrapper
+from tfc.protocols import tf_apply_unitary, ApplyTFUnitaryArgs, tf_gate_wrapper
 
 
 

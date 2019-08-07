@@ -4,4 +4,5 @@ from tfc.protocols.gate_wrappers import (
 
 from tfc.protocols.tf_apply_unitary import (
     tf_apply_unitary,
+    ApplyTFUnitaryArgs,
 )

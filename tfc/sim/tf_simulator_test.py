@@ -7,7 +7,6 @@ import tensorflow as tf
 import cirq
 
 from tfc.sim import TFWaveFunctionSimulator
-from tfc.protocols import tf_gate_wrapper
 
 
 def q(i):
