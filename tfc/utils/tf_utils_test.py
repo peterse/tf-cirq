@@ -1,13 +1,11 @@
-import tensorflow as tf
-import cirq
-import sys
-sys.path.insert(0, ".")
-from tf_simulator import (
-    TFWaveFunctionSimulator
-)
-from tf_utils import tensorboard_session
-
 import numpy as np
+import tensorflow as tf
+
+import cirq
+
+from tfc.sim import TFWaveFunctionSimulator
+from tfc.utils import tensorboard_session
+
 
 def q(i):
     return cirq.LineQubit(i)

@@ -1,14 +1,10 @@
 """Evan's tests for experimental code. DO NOT EDIT."""
+import pytest
+
 import cirq
 import tensorflow as tf
 import numpy as np
-import sys
-import pytest
-sys.path.insert(0, ".")
-from gate_wrappers import (
-    tf_gate_wrapper,
-    ALL_WRAPPERS,
-)
+from tfc.protocols import tf_gate_wrapper, ALL_WRAPPERS
 
 
 def q(i):

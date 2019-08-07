@@ -1,20 +1,14 @@
 """Evan's tests for experimental code. Do not edit."""
 import random
 import pytest
-from timeit import default_timer as timer
 import numpy as np
 
 import tensorflow as tf
 import cirq
 
-import sys
-sys.path.insert(0, ".")
-from tf_simulator import (
-    TFWaveFunctionSimulator
-)
-from gate_wrappers import (
-    tf_gate_wrapper,
-)
+from tfc.sim import TFWaveFunctionSimulator
+from tfc.protocols import tf_gate_wrapper
+
 
 def q(i):
     return cirq.LineQubit(i)

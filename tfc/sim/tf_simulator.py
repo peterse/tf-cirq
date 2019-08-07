@@ -4,18 +4,12 @@ import numpy as np
 import math
 
 from typing import Any, Dict, Iterator, List, Union
-from cirq.sim import simulator, wave_function, wave_function_simulator, SimulationTrialResult
-from cirq import circuits, linalg, ops, protocols, study
-import sys
-sys.path.insert(0, ".")
-from tf_apply_unitary import (
-    tf_apply_unitary,
-    ApplyTFUnitaryArgs,
-)
+from cirq.sim import simulator
+from cirq import circuits, ops, study
 
-from gate_wrappers import (
-    tf_gate_wrapper
-)
+from tfc.tf_apply_unitary import tf_apply_unitary, ApplyTFUnitaryArgs
+from tfc.gate_wrappers import tf_gate_wrapper
+
 
 
 # Mutable named tuple to hold state and a buffer.

@@ -5,10 +5,8 @@ import cirq
 import tensorflow as tf
 import numpy as np
 import sys
-sys.path.insert(0, ".")
-from tf_apply_unitary import (
-    ApplyTFUnitaryArgs,
-)
+
+from tfc.tf_apply_unitary import ApplyTFUnitaryArgs
 """
 LOCAL TODO:
     - wrapper constructs for every cirq gate

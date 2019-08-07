@@ -2,12 +2,8 @@
 import numpy as np
 import tensorflow as tf
 import cirq
-import sys
-sys.path.insert(0, ".")
-from tf_apply_unitary import (
-    tf_apply_unitary,
-    ApplyTFUnitaryArgs,
-)
+from tfc.protocols import tf_apply_unitary, ApplyTFUnitaryArgs
+
 
 INITIAL_STATE = np.asarray([1, 0])
 TEST_VAR = tf.Variable(1.0)
