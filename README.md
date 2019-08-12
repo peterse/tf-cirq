@@ -11,6 +11,8 @@ pip install -e .
 
 ### Examples
 
+WARNING: This supports only a restricted gateset, pending resolution of #5
+
 Wrap a basic circuit:
 ```
 q = cirq.LineQubit.range(2)
