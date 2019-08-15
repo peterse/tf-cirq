@@ -42,18 +42,23 @@ class BaseTFGate(cirq.SupportsUnitary, cirq.SupportsConsistentApplyUnitary):
         """Overwrite of _unitary_ to block cirq.unitary protocol."""
         return self._tensor
 
-    def _tensor_from_eigencomponents(self, tensor: tf.Tensor) -> tf.Tensor:
+    def _tensor_from_eigencomponents(self) -> tf.Tensor:
         """Compose a valid tensor from this gate's eigencomponents.
 
         This is a stand-in for cirq._unitary_ automatically composing the
         tensor from eigencomponents.
+
+        This relies on shape and dtype specified at initialization of
+        components in `_eigen_components`.
         """
-        for half_turns, component in self._eigen_components():
+        for s, (half_turns, component) in enumerate(self._eigen_components()):
+            if s == 0:
+                tensor = tf.zeros_like(component, dtype=self._dtype)
             e = self._exponent
             g = self._global_shift
-            tensor = tf.add(
-                tf.scalar_mul(tf.exp(1j * np.pi * e * (half_turns + g)),
-                              component), tensor)
+            eig_exp = tf.exp(1j * np.pi * e * (half_turns + g))
+            component = tf.scalar_mul(eig_exp, component)
+            tensor = tf.add(component, tensor)
         return tensor
 
 
@@ -78,8 +83,7 @@ class WrapXPowGate(BaseTFGate):
         # ], name=name)
         # self._tensor = tf.scalar_mul(
         #     tf.exp(1j * (np.pi*theta/2 + 2*np.pi*global_shift)), self._tensor)
-        self._tensor = tf.zeros((2, 2), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
+        self._tensor = self._tensor_from_eigencomponents()
 
         # TODO: different classing structure that will let me track qubits
         # super().__init__(tensor, [qubit], [theta])
@@ -93,6 +97,7 @@ class WrapXPowGate(BaseTFGate):
                 tf.convert_to_tensor(np.array([[0.5, -0.5], [-0.5, 0.5]]), dtype=self._dtype,
                     name="eig_XPowGate_1")), # !hep-qml FIXME
         ]
+
 
 class WrapYPowGate(BaseTFGate):
 
@@ -113,8 +118,7 @@ class WrapYPowGate(BaseTFGate):
         # ], name=name)
         # self._tensor = tf.scalar_mul(
         #     tf.exp(1j * theta * np.pi * (global_shift + 0.5) / 2), self._tensor)
-        self._tensor = tf.zeros((2, 2), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
+        self._tensor = self._tensor_from_eigencomponents()
 
     def _eigen_components(self):
         return [
@@ -144,8 +148,7 @@ class WrapZPowGate(BaseTFGate):
         #     [1, 0],
         #     [0, tf.exp(1j * theta * np.pi * (global_shift + 0.5))]
         # ], name=name)
-        self._tensor = tf.zeros((2, 2), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
+        self._tensor = self._tensor_from_eigencomponents()
 
     def _eigen_components(self):
         return [
@@ -176,8 +179,7 @@ class WrapHPowGate(BaseTFGate):
         #     [-1j * tf.sin(np.pi * theta / 2)/np.sqrt(2), tf.cos(np.pi * theta / 2) + 1j * tf.sin(np.pi * theta / 2)/np.sqrt(2)]
         # ], name=name)
         # self._tensor = tf.scalar_mul(tf.exp(1j * theta * np.pi * (global_shift + 0.5) / 2), self._tensor)
-        self._tensor = tf.zeros((2, 2), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
+        self._tensor = self._tensor_from_eigencomponents()
 
     def _eigen_components(self):
         s = np.sqrt(2)
@@ -221,9 +223,7 @@ class WrapCNotPowGate(BaseTFGate):
         #         tf.exp(1j * theta * np.pi * (global_shift + 0.5) / 2) * tf.cos(np.pi * theta / 2)]
         # ], name=name)
         #
-        self._tensor = tf.zeros((4, 4), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
-        self._tensor = tf.reshape(self._tensor, (2,2,2,2))
+        self._tensor = self._tensor_from_eigencomponents()
 
     def _eigen_components(self):
         return [
@@ -232,7 +232,7 @@ class WrapCNotPowGate(BaseTFGate):
                     np.array([[1, 0, 0, 0],
                               [0, 1, 0, 0],
                               [0, 0, 0.5, 0.5],
-                              [0, 0, 0.5, 0.5]]),
+                              [0, 0, 0.5, 0.5]]).reshape(2,2,2,2),
                     dtype=self._dtype,
                     name="eig_CNotPowGate_0")), # !hep-qml FIXME
             (tf.constant(1, dtype=self._dtype),
@@ -240,7 +240,7 @@ class WrapCNotPowGate(BaseTFGate):
                     np.array([[0, 0, 0, 0],
                               [0, 0, 0, 0],
                               [0, 0, 0.5, -0.5],
-                              [0, 0, -0.5, 0.5]]),
+                              [0, 0, -0.5, 0.5]]).reshape(2,2,2,2),
                     dtype=self._dtype,
                     name="eig_CNotPowGate_1")), # !hep-qml FIXME
         ]
@@ -268,9 +268,7 @@ class WrapSwapPowGate(BaseTFGate):
         #     [0, 0, 0, 1]
         # ], name=name)
         # self._tensor = tf.reshape(self._tensor, (2,2,2,2))
-        self._tensor = tf.zeros((4, 4), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
-        self._tensor = tf.reshape(self._tensor, (2,2,2,2))
+        self._tensor = self._tensor_from_eigencomponents()
 
     def _eigen_components(self):
         return [
@@ -279,7 +277,7 @@ class WrapSwapPowGate(BaseTFGate):
                     np.array([[1, 0,   0,   0],
                               [0, 0.5, 0.5, 0],
                               [0, 0.5, 0.5, 0],
-                              [0, 0,   0,   1]]),
+                              [0, 0,   0,   1]]).reshape(2,2,2,2),
                     dtype=self._dtype,
                     name="eig_SWAPPowGate_0")), # !hep-qml FIXME
             (tf.constant(1, dtype=self._dtype),
@@ -287,7 +285,7 @@ class WrapSwapPowGate(BaseTFGate):
                     np.array([[0,  0,    0,   0],
                               [0,  0.5, -0.5, 0],
                               [0, -0.5,  0.5, 0],
-                              [0,  0,    0,   0]]),
+                              [0,  0,    0,   0]]).reshape(2,2,2,2),
                     dtype=self._dtype,
                     name="eig_SWAPPowGate_1")), # !hep-qml FIXME
         ]
@@ -306,19 +304,21 @@ class WrapZZPowGate(BaseTFGate):
         self._exponent = theta
         self._global_shift = global_shift
         self._dtype = dtype
-        self._tensor = tf.zeros((4, 4), dtype=dtype)
-        self._tensor = self._tensor_from_eigencomponents(self._tensor)
-        self._tensor = tf.reshape(self._tensor, (2, 2, 2, 2))
+        self._tensor = self._tensor_from_eigencomponents()
         self._qubits = [qubits[0].x, qubits[1].x]
 
     def _eigen_components(self):
         """Overwrite EigenGate np arrays to avoid messy casting."""
         return [
             (tf.constant(0, dtype=self._dtype),
-                tf.convert_to_tensor(np.diag([1, 0, 0, 1]), dtype=self._dtype,
+                tf.convert_to_tensor(
+                    np.diag([1, 0, 0, 1]).reshape(2,2,2,2),
+                    dtype=self._dtype,
                     name="eig_ZZPowGate_0".format(self.name))), # !hep-qml FIXME
             (tf.constant(1, dtype=self._dtype),
-                tf.convert_to_tensor(np.diag([0, 1, 1, 0]), dtype=self._dtype,
+                tf.convert_to_tensor(
+                    np.diag([0, 1, 1, 0]).reshape(2,2,2,2),
+                    dtype=self._dtype,
                     name="eig_ZZPowGate_1".format(self.name))), # !hep-qml FIXME
         ]
 
