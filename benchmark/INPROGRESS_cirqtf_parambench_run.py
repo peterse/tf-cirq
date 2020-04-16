@@ -144,22 +144,23 @@ def timeit_n_rounds_k_updates(qubits, depth, sim_trials, n_param_updates):
         start = timer()
         for j in range(n_param_updates):
             final_state = TFWaveFunctionSimulator(dtype=tf.complex64).simulate(
-                tfcirq_circuit, initial_state=np.copy(wf))
-            with tf.Session() as sess:
-                tfcirq_outcomes[j] = sess.run(final_state)[v_ind]
+                tfcirq_circuit, initial_state=np.copy(x))
+            tfcirq_outcomes[j] = final_state[v_ind]
 
         tfcirq_times_trial_time = timer() - start
         tfcirq_times.append(tfcirq_times_trial_time)
 
+        # TODO: need to port everything over to tf2
         # initialize a copy of the circuit, this time using hard-coded angles
         # the symbols will be overwritten with the first update.
         float_circuit = base_circuit.copy()
+        resolver = cirq.to_sweep({})
         start = timer()
         for j in range(n_param_updates):
             # Regenerate _entire_ circuit with updates to float values
             # each time includes the circuit construction time
             float_circuit = update_params(float_circuit, all_params[j][:])
-            float_outcomes[j] = cirq.Simulator().simulate(float_circuit, initial_state=np.copy(x)).final_state[v_ind]
+            float_outcomes[j] = cirq.Simulator().simulate_sweep(float_circuit, initial_state=np.copy(x), params=resolver).final_state[v_ind]
 
         float_trial_time = timer() - start
         float_times.append(float_trial_time)
