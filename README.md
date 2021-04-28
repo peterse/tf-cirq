@@ -1,6 +1,6 @@
 # tf-cirq
 
-A basic wrapper for converting cirq.Circuit into a tensorflow graph.
+This was a prototype I played with before we made Tensorflow Quantum. Its a naive wrapper for converting cirq.Circuit into a tensorflow graph by just reproducing the logic in cirq's targeted unitary matmuls. Its in tensorflow==1.13 unfortunately.
 
 ### Installation
 git clone git@github.com:peterse/tf-cirq
